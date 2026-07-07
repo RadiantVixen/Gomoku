@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <tuple>
+#include <iostream>
 
 enum class Player {
     NONE = 0,
@@ -23,20 +24,21 @@ public:
     Player getCell(int row, int col) const;
     Player getCurrentPlayer() const { return currentPlayer; }
     
-    bool checkWin(int row, int col) const;
-    bool checkCapture(int row, int col) const;
-    std::vector<std::tuple<int, int>> isCapturable(int row, int col);
-    bool isThereaNeed(int row, int col);
-    bool doubleThrees(int row, int col);
+    bool checkWin(Player p, int row, int col) const;
+    bool checkCapture(int row, int col);
+    std::vector<std::tuple<int, int>> isCapturable(Player p, int row, int col);
+    bool doubleThree(Player p, int row, int col) const;
+    bool isFreeThree(Player p, int row, int col) const;
     Player getWinner() const { return winner; }
-    bool isGameOver() const { return gameOver; }
-
-private:
+    bool isGameOver();
+    
+    private:
     std::vector<std::vector<Player>> grid;
     Player currentPlayer;
     Player winner;
     bool gameOver;
-
+    int whiteStonesCaptured;
+    int blackStonesCaptured;
     bool checkDirection(int row, int col, int dRow, int dCol) const;
 };
 
