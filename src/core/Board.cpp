@@ -14,7 +14,7 @@ void Board::reset() {
 }
 
 bool Board::isValidMove(int row, int col) const {
-    if (row < 0 || row >= SIZE || col < 0 || col >= SIZE) {
+    if (row < 0 || row >= SIZE || col < 0 || col >= SIZE || doubleThree(currentPlayer, row, col)) {
         return false;
     }
     return grid[row][col] == Player::NONE;
@@ -139,6 +139,7 @@ bool Board::isFreeThree(Player p, int row, int col) const{
     return false;
 }
 
+
 bool Board::doubleThree(Player p, int row, int col) const{
     int count = 0;
     for (int i = 0; i < 4; ++i) {
@@ -152,23 +153,28 @@ bool Board::doubleThree(Player p, int row, int col) const{
 
 bool Board::isGameOver(){
     Player opponent = (currentPlayer == Player::BLACK) ? Player::WHITE : Player::BLACK;
-
+    
+    if (whiteStonesCaptured >= 10){
+        winner = Player::BLACK;
+        gameOver = true;
+        return true;
+    }
+    else if (blackStonesCaptured >= 10){
+        winner = Player::WHITE;
+        gameOver = true;
+        return true;
+    }
+    
     for (int i = 0; i < SIZE; i++){
         for (int j = 0; j < SIZE; j++){
             if (grid[i][j] == Player::NONE){
-                if (this->checkWin(currentPlayer, i, j) || this->checkWin(opponent, i, j))
+                if (this->checkPotentialWin(currentPlayer, i, j) || this->checkPotentialWin(opponent, i, j))
                     return false;
                 if (!this->isCapturable(currentPlayer, i, j).empty() || !this->isCapturable(opponent, i, j).empty())
                     return false;
             }
         }
     }
-    std::cout << "jghkj\n";
-    if (whiteStonesCaptured >= 2)
-        winner = Player::BLACK;
-    else if (blackStonesCaptured >= 2)
-        winner = Player::WHITE;
-
     gameOver = true;
     return gameOver;
 }
@@ -197,6 +203,43 @@ bool Board::checkWin(Player p,int row, int col) const {
         r = row - directions[i][0];
         c = col - directions[i][1];
         while (r >= 0 && r < SIZE && c >= 0 && c < SIZE && grid[r][c] == p) {
+            count++;
+            r -= directions[i][0];
+            c -= directions[i][1];
+        }
+
+        if (count >= 5) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+bool Board::checkPotentialWin(Player p,int row, int col) const {
+    if (p == Player::NONE) return false;
+
+    int directions[4][2] = {
+        {0, 1},
+        {1, 0},
+        {1, 1},
+        {1, -1}
+    };
+
+    for (int i = 0; i < 4; ++i) {
+        int r = row + directions[i][0];
+        int c = col + directions[i][1];
+        int count = 1;
+        while (r >= 0 && r < SIZE && c >= 0 && c < SIZE && (grid[r][c] == p || grid[r][c] == Player::NONE)) {
+            count++;
+            r += directions[i][0];
+            c += directions[i][1];
+        }
+
+        r = row - directions[i][0];
+        c = col - directions[i][1];
+        while (r >= 0 && r < SIZE && c >= 0 && c < SIZE &&  (grid[r][c] == p || grid[r][c] == Player::NONE)) {
             count++;
             r -= directions[i][0];
             c -= directions[i][1];

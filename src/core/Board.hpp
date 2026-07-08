@@ -26,6 +26,7 @@ public:
     
     bool checkWin(Player p, int row, int col) const;
     bool checkCapture(int row, int col);
+    bool checkPotentialWin(Player p,int row, int col) const;
     std::vector<std::tuple<int, int>> isCapturable(Player p, int row, int col);
     bool doubleThree(Player p, int row, int col) const;
     bool isFreeThree(Player p, int row, int col) const;
