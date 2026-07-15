@@ -5,6 +5,19 @@
 #include <tuple>
 #include <iostream>
 
+
+const int MAX_DEPTH = 10;
+const int WINNING = 99999999999;
+const int LOSING = -99999999999;
+const int CAPTURABLE_FIVE = 100000;
+const int CAPTURE = 10000;
+const int OPEN_FOUR = 10000;
+const int OPEN_THREE = 1000;
+const int CLOSED_FOUR = 1000;
+const int CLOSED_THREE = 100;
+const int CAPTURABLE = -10;
+
+
 enum class Player {
     NONE = 0,
     BLACK = 1,
