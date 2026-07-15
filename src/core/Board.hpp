@@ -22,8 +22,7 @@ public:
     bool makeMove(int row, int col);
     bool isValidMove(int row, int col) const;
     Player getCell(int row, int col) const;
-    Player getCurrentPlayer() const { return currentPlayer; }
-    
+    Player getCurrentPlayer() const { return currentPlayer;}
     bool checkFiveInRow(Player p, int row, int col) const;
     bool checkCapture(int row, int col);
     bool checkPotentialWin(Player p,int row, int col) const;
