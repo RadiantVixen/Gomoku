@@ -14,17 +14,6 @@ std::list<std::tuple<int, int>> generateLegalMoves(const Board& board) {
 }
 
 
-const int MAX_DEPTH = 10;
-const int WINNING = 99999999999;
-const int LOSING = -99999999999;
-const int CAPTURABLE_FIVE = 100000;
-const int CAPTURE = 10000;
-const int OPEN_FOUR = 10000;
-const int OPEN_THREE = 1000;
-const int CLOSED_FOUR = 1000;
-const int CLOSED_THREE = 100;
-const int CAPTURABLE = -10;
-
 int heuristicEvaluation(const Board& board) {
     Player currentPlayer = board.getCurrentPlayer();
     Player opponent = (currentPlayer == Player::BLACK) ? Player::WHITE : Player::BLACK;
@@ -33,21 +22,16 @@ int heuristicEvaluation(const Board& board) {
     for (int i = 0; i < Board::SIZE; ++i) {
         for (int j = 0; j < Board::SIZE; ++j) {
             if (board.getCell(i, j) == currentPlayer) {
-                score += checkwin(board, currentPlayer, i, j);
+                score += heuristicWin(board, currentPlayer, i, j);
+                score += checkCapture(board, currentPlayer, i, j);
                 score += CapturableFive(board, currentPlayer, i, j);
-                score += OpenFour(board, currentPlayer, i, j);
-                score += OpenThree(board, currentPlayer, i, j);
-                score += ClosedFour(board, currentPlayer, i, j);
-                score += ClosedThree(board, currentPlayer, i, j);
-                score += Capturable(board, currentPlayer, i, j);
+                score += ItWorth(board, currentPlayer, i, j);
+                score -= Capturable(board, currentPlayer, i, j);
             } else if (board.getCell(i, j) == opponent) {
-                score -= checkwin(board, opponent, i, j) - 9999999999;
+                score -= heuristicWin(board, opponent, i, j) - 9999999999;
                 score -= CapturableFive(board, opponent, i, j);
-                score -= OpenFour(board, opponent, i, j);
-                score -= OpenThree(board, opponent, i, j);
-                score -= ClosedFour(board, opponent, i, j);
-                score -= ClosedThree(board, opponent, i, j);
-                score -= Capturable(board, opponent, i, j);
+                score -= ItWorth(board, opponent, i, j);
+                score += Capturable(board, opponent, i, j);
             }
         }
     }

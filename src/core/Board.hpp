@@ -15,7 +15,7 @@ const int OPEN_FOUR = 10000;
 const int OPEN_THREE = 1000;
 const int CLOSED_FOUR = 1000;
 const int CLOSED_THREE = 100;
-const int CAPTURABLE = -10;
+const int CAPTURABLE = -100;
 
 
 enum class Player {
@@ -27,32 +27,30 @@ enum class Player {
 class Board {
 public:
     static const int SIZE = 19;
-
-    Board();
-    ~Board() = default;
-
-    void reset();
-    bool makeMove(int row, int col);
-    bool isValidMove(int row, int col) const;
-    Player getCell(int row, int col) const;
-    Player getCurrentPlayer() const { return currentPlayer;}
-    bool checkFiveInRow(Player p, int row, int col) const;
-    bool checkCapture(int row, int col);
-    bool checkPotentialWin(Player p,int row, int col) const;
-    std::vector<std::tuple<int, int>> isCapturable(Player p, int row, int col);
-    bool doubleThree(Player p, int row, int col) const;
-    bool isFreeThree(Player p, int row, int col) const;
-    Player getWinner() const { return winner; }
-    bool isGameOver();
-    
-    private:
     std::vector<std::vector<Player>> grid;
     Player currentPlayer;
     Player winner;
     bool gameOver;
     int whiteStonesCaptured;
     int blackStonesCaptured;
-    bool checkDirection(int row, int col, int dRow, int dCol) const;
+
+    Board();
+    ~Board() = default;
+
+    void reset();
+    Player getCell(int row, int col);
+    bool isValidMove(int row, int col);
+    bool makeMove(int row, int col);
+    int checkFiveInRow(Player p, int row, int col);
+    bool checkCapture(int row, int col);
+    bool doubleThree(Player p, int row, int col);
+    bool isFreeThree(Player p, int row, int col);
+    bool isGameOver();
+    bool checkwin(Player p, int row, int col);
+    Player getCurrentPlayer() { return currentPlayer;}
+    Player getWinner() { return winner; }
+
+    
 };
 
 #endif
