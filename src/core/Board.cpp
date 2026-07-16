@@ -1,4 +1,6 @@
 #include "Board.hpp"
+#include "AI.hpp"
+#include <algorithm>
 
 Board::Board() {
     reset();
@@ -13,7 +15,7 @@ void Board::reset() {
     blackStonesCaptured = 0;
 }
 
-bool Board::isValidMove(int row, int col) {
+bool Board::isValidMove(int row, int col) const {
     if (row < 0 || row >= SIZE || col < 0 || col >= SIZE ) {
         return false;
     }
@@ -38,7 +40,7 @@ bool Board::makeMove(int row, int col) {
 
     grid[row][col] = currentPlayer;
 
-    this->checkCapture(row, col);
+    this->checkCapture(currentPlayer, row, col);
 
     if (checkwin(currentPlayer, row, col)) {
         winner = currentPlayer;
@@ -47,7 +49,7 @@ bool Board::makeMove(int row, int col) {
         currentPlayer = (currentPlayer == Player::BLACK) ? Player::WHITE : Player::BLACK;
     }
 
-    this->isGameOver();
+    // this->isGameOver();
         
     return true;
 }
@@ -111,7 +113,7 @@ bool Board::doubleThree(Player p, int row, int col) {
 }
 
 
-bool Board::isCapturable(Player p, int row, int col){
+bool Board::isCapturable(Player p, int i, int j){
     if (p == Player::NONE) return 0;
     Player opponent = (p == Player::BLACK) ? Player::WHITE : Player::BLACK;
     int directions[8][2] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
@@ -121,7 +123,7 @@ bool Board::isCapturable(Player p, int row, int col){
         int r = i - directions[k][0];
         int c = j - directions[k][1];
         int l = 0;
-        if (r >= 0 && r < SIZE && c >= 0 && c < SIZE && board.grid[r][c] != opponent && board.grid[r][c] != Player::NONE)
+        if (r >= 0 && r < SIZE && c >= 0 && c < SIZE && grid[r][c] != opponent && grid[r][c] != Player::NONE)
             continue;
 
         while (r >= 0 && r < SIZE && c >= 0 && c < SIZE && l < 4) {
@@ -147,7 +149,7 @@ bool Board::isCapturable(Player p, int row, int col){
 
 int Board::checkFiveInRow(Player p,int row, int col)  {
     if (p == Player::NONE) return false;
-    capturable = 0;
+    int capturable = 0;
 
     int directions[4][2] = {
         {0, 1},
@@ -162,8 +164,8 @@ int Board::checkFiveInRow(Player p,int row, int col)  {
         int count = 1;
         while (r >= 0 && r < SIZE && c >= 0 && c < SIZE && grid[r][c] == p) {
             count++;
-            if isCapturable(p, r, c):
-            capturable++;
+            if (this->isCapturable(p, r, c))
+                capturable++;
             r += directions[i][0];
             c += directions[i][1];
         }
@@ -172,17 +174,17 @@ int Board::checkFiveInRow(Player p,int row, int col)  {
         c = col - directions[i][1];
         while (r >= 0 && r < SIZE && c >= 0 && c < SIZE && grid[r][c] == p) {
             count++;
-            if isCapturable(p, r, c):
-            capturable++;
+            if (this->isCapturable(p, r, c))
+                capturable++;
+            
             r -= directions[i][0];
             c -= directions[i][1];
         }
         
         if (count >= 5) {
-            
-            return 1 if (capturable >= 1) {
+            if (capturable >= 1)
                 return 2;
-            }
+            return 1;
         }
     }
     
@@ -190,13 +192,15 @@ int Board::checkFiveInRow(Player p,int row, int col)  {
 }
 
 bool Board::isGameOver(){
-    Player opponent = (currentPlayer == Player::BLACK) ? Player::WHITE : Player::BLACK;
-    gameOver = true;
-    return gameOver;
-}
+    if (heuristicEvaluation(*this) == 0) {
+        gameOver = true;
+        return true;
+    }
+    return false;
+} 
 
 bool Board::checkwin(Player p, int row, int col){
-    if (if p == Player::BLACK && whiteStonesCaptured >= 10){
+    if (p == Player::BLACK && whiteStonesCaptured >= 10){
         winner = Player::BLACK;
         gameOver = true;
         return true;
@@ -212,3 +216,9 @@ bool Board::checkwin(Player p, int row, int col){
     }
     return false;
 }
+
+bool Board::isFreeThree(Player, int, int) {
+    return false;
+}
+
+

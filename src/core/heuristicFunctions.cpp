@@ -1,7 +1,5 @@
 #include "Board.hpp"
 
-
-
 int heuristicWin(const Board& board, Player currentPlayer, int i, int j) {
     if (board.checkwin(currentPlayer, i, j)) {
         return WINNING;

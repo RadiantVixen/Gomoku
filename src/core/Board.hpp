@@ -4,11 +4,11 @@
 #include <vector>
 #include <tuple>
 #include <iostream>
-
+#include <list>
 
 const int MAX_DEPTH = 10;
-const int WINNING = 99999999999;
-const int LOSING = -99999999999;
+long const int WINNING = 99999999999;
+long const int LOSING = -99999999999;
 const int CAPTURABLE_FIVE = 100000;
 const int CAPTURE = 10000;
 const int OPEN_FOUR = 10000;
@@ -38,19 +38,23 @@ public:
     ~Board() = default;
 
     void reset();
-    Player getCell(int row, int col);
-    bool isValidMove(int row, int col);
+    Player getCell(int row, int col) const;
+    bool isValidMove(int row, int col) const;
     bool makeMove(int row, int col);
+    bool isCapturable(Player p, int row, int col);
     int checkFiveInRow(Player p, int row, int col);
-    bool checkCapture(int row, int col);
+    bool checkCapture(Player p, int row, int col);
     bool doubleThree(Player p, int row, int col);
     bool isFreeThree(Player p, int row, int col);
     bool isGameOver();
     bool checkwin(Player p, int row, int col);
-    Player getCurrentPlayer() { return currentPlayer;}
-    Player getWinner() { return winner; }
+    Player getCurrentPlayer() const { return currentPlayer;}
+    Player getWinner() const { return winner; }
+    void undoMove(int row, int col);
 
     
 };
 
 #endif
+
+

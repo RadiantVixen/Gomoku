@@ -1,54 +1,44 @@
 <!-- Copilot / AI agent instructions for the Gomoku repo -->
-# Quick orientation
+# Gomoku agent guide
 
-This repository is a small C++17 Gomoku implementation with a native SDL2 GUI.
-Key facts:
-- Binary produced: `Gomoku` (root of repo)
-- Build system: `Makefile` (targets: `all`, `clean`, `fclean`, `re`)
-- Windowing/graphics: SDL2 (`libsdl2-dev` / `pkg-config` required)
+This repo is a small C++17 Gomoku game with an SDL2 desktop UI.
+- Binary: `Gomoku`
+- Build: `Makefile` with `all`, `clean`, `fclean`, `re`
+- Dependency: SDL2 via `pkg-config` (`libsdl2-dev` on Debian/Ubuntu)
 
-**Main components** (read these files first):
-- `src/main.cpp` — program entry: constructs `Board` and `GUI`, then calls `gui.run()`.
-- `src/core/Board.hpp` / `src/core/Board.cpp` — game rules and state (board size, move validation, win detection, captures, game-over logic).
-- `src/gui/GUI.hpp` / `src/gui/GUI.cpp` — SDL2 rendering, event handling and user interaction. Heavy rendering code and input-to-board translation live here.
-- `src/core/AI.cpp` — empty placeholder where AI logic should go. Integrate AI by calling `Board` methods.
+## Read first
+- `src/main.cpp` creates `Board` and `GUI`, then calls `gui.run()`.
+- `src/core/Board.hpp` / `src/core/Board.cpp` hold all game state and rule logic: 19x19 grid, current player, winner, captures, move validation, win checks.
+- `src/gui/GUI.hpp` / `src/gui/GUI.cpp` handle SDL setup, mouse input, rendering, and the board-to-screen coordinate mapping.
+- `src/core/AI.cpp` and `src/core/heuristicFunctions.cpp` are AI-related sources, but the default `Makefile` does not compile them.
 
-Build & run (developer workflows)
-- Install deps: `sudo apt install libsdl2-dev pkg-config` (or equivalent for your OS).
-- Build: `make` (uses `pkg-config --cflags/--libs sdl2` inside the Makefile).
-- Clean: `make clean` (removes `obj/`), `make fclean` removes `Gomoku` binary too.
-- Quick debug build (no optimizations, include debug symbols):
-  `make CXXFLAGS='-g -O0 -std=c++17 $(shell pkg-config --cflags sdl2)'`
-- Run: `./Gomoku` from repo root.
+## Build and run
+- Build with `make` from the repo root.
+- Debug build: `make CXXFLAGS='-g -O0 -std=c++17 $(shell pkg-config --cflags sdl2)'`
+- Clean with `make clean`; remove the binary with `make fclean`; rebuild from scratch with `make re`.
+- Run with `./Gomoku`.
 
-Important repository conventions & patterns
-- Object files placed under `obj/` mirroring `src/` structure. When adding `.cpp` files, update the `SRCS` list in the `Makefile`.
-- `DEPS` in the `Makefile` lists headers used to trigger recompilation. If you add public headers, add them to `DEPS` or run `make re` for a full rebuild.
-- No namespaces are used; files use plain global enum `Player` and classes `Board`, `GUI`.
-- Avoid modifying rendering code in `GUI.cpp` unless necessary; it contains many low-level drawing helpers (fonts, rounded rects, disks). Small UI tweaks are fine, but large changes to rendering logic can be noisy.
+## Project-specific conventions
+- `Board::SIZE` is `19`; row/col indices map directly to GUI intersections.
+- `Player` is a scoped enum (`NONE`, `BLACK`, `WHITE`); files use no namespaces.
+- Object files live under `obj/` mirroring `src/`.
+- If you add a new `.cpp`, update `SRCS` in the `Makefile`; if you add or change public headers, update `DEPS` too.
 
-Guidance for editing game logic
-- Primary rule logic lives in `src/core/Board.*`:
-  - `makeMove`, `isValidMove`, `checkWin`, `isCapturable`, `checkCapture`, `isGameOver`, `checkPotentialWin`.
-  - `Board::SIZE` is `19`. Coordinate system: `row` and `col` indexes map directly to GUI grid.
-- If you change function signatures in headers, update callers in `GUI.cpp` and `main.cpp`.
-- For rule experiments, add small, isolated helpers in `Board` and keep deterministic behavior for easier testing.
+## Editing rules and UI code
+- Keep rule changes in `Board` first; the GUI should read board state and only trigger `makeMove()` / `reset()`.
+- If you change a `Board` or `GUI` signature, update all callers in `main.cpp`, `GUI.cpp`, and any AI code.
+- `GUI.cpp` is intentionally dense: it contains custom drawing helpers, bitmap text, rounded rectangles, and stone rendering. Prefer small, localized changes there.
 
-AI-specific notes
-- `src/core/AI.cpp` exists but is empty — intended integration point for computer opponent logic.
-- Recommended approach: implement AI functions that accept `const Board&` or use `Board` APIs such as `getCell`, `getCurrentPlayer`, `isCapturable`, `checkPotentialWin` and return a row/col move. Avoid making AI directly mutate GUI state.
-- When adding an AI, consider exposing a thin interface (e.g., `std::pair<int,int> AI::chooseMove(const Board&)`) and call it from `GUI` or from a new controller layer.
+## AI integration
+- Implement AI as a thin layer over `Board` APIs such as `getCell()`, `isValidMove()`, `makeMove()`, `checkCapture()`, and `checkwin()`.
+- Keep AI non-blocking so the SDL event loop stays responsive.
+- If you wire in AI sources, remember to add them to the build; they are present in the tree but not linked by default.
 
-Testing & debugging tips
-- To enable easier debugging, build with `-g -O0` as shown above and run under `gdb` or `rr`/`valgrind` for memory issues.
-- Rendering bugs are easiest to reproduce by running `./Gomoku` and interacting. For logic-only tests, create a small test harness that includes `Board.hpp` and drives `makeMove`/`checkWin` without SDL.
+## Verification habits
+- Re-run `make` after header or signature changes; this repo currently has some source/header drift, so include and declaration mismatches are common failure points.
+- Use a small harness or direct GUI run to validate rule changes; for rendering issues, launch `./Gomoku` and test interactively.
 
-Quick examples (common edits)
-- Add a new source file: create `src/core/new.cpp`, then add it to `SRCS` in `Makefile` and `make`.
-- Change Board API: update `src/core/Board.hpp`, run `make` and fix compile errors in `src/gui/GUI.cpp`.
-- Implement AI: write `src/core/AI.cpp` and call `AI::chooseMove(board)` from `GUI` or a new controller; do not add heavy blocking calls on the main thread (GUI loop must remain responsive).
-
-If something is unclear
-- Tell me which area you want expanded: build, rules, AI integration, or GUI rendering. I can add targeted examples or create a minimal AI stub and instructions to wire it in.
-
--- End of file
+## Examples
+- Add a helper: put rule logic in `src/core/Board.cpp`, expose it in `Board.hpp`, then rebuild.
+- Add a source file: create it under `src/`, add it to `SRCS`, and update `DEPS` if it has a public header.
+- Add AI: expose a move-selection function in `src/core/AI.cpp` and call it from the game flow without blocking `GUI::run()`.
