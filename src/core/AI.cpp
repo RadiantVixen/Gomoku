@@ -80,3 +80,33 @@ std::list<std::tuple<int, int>> CandidateOrdering(const Board& board) {
 
     return orderedCandidates;
 }
+
+
+std::tuple<int, int> MinMax(const Board& board, int depth, bool isMaximizing, int trac) {
+    std::list<std::tuple<int, int>> moves = CandidateOrdering(board);
+
+    if trac == depth:
+        std::tuple<int, int> ret;
+        scoremin = 0
+        scoremin =
+        for move in moves{
+            b = board.copy()
+            makeMove(b, move)
+            score = heuristicEvaluation(b)
+            if isMaximizing == 0 and score > scoremax:
+                ret = move
+            if isMaximizing == 1 and score < scoremin:
+                ret = move
+        }
+        return ret
+    
+    
+    for move in moves{
+        makeMove(board.copy(), move[0], move[1])
+        MinMax(board, depth, ! isMaximizing, trac + 1)
+    }
+
+
+}
+
+

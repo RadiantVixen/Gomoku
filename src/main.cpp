@@ -20,14 +20,15 @@ int main(int argc, char* argv[]) {
     gui.run();
     
     auto candidates = CandidateOrdering(board);
-    for (const auto& move : candidates) {
-        std::cout << "Candidate Move: (" << std::get<0>(move) << ", "
-                  << std::get<1>(move) << ')' << std::endl;
-    }
+    // for (const auto& move : candidates) {
+    //     std::cout << "Candidate Move: (" << std::get<0>(move) << ", "
+    //               << std::get<1>(move) << ')' << std::endl;
+    // }
     if (!candidates.empty()) {
         const auto& move = candidates.front();
         std::cout << "Candidate Move: (" << std::get<0>(move) << ", "
                   << std::get<1>(move) << ')' << std::endl;
+        std::cout << "Heuristic Evaluation: " << heuristicEvaluation(board) << std::endl;
     }
     return 0;
 }
