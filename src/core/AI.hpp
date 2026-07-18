@@ -1,7 +1,8 @@
 #include "Board.hpp"
 #include <algorithm>
 #include <list>
-
+#include <tuple>
+#include <climits>
 
 std::list<std::tuple<int, int>> generateLegalMoves(const Board& board);
 int heuristicEvaluation(const Board& board);

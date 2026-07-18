@@ -1,5 +1,4 @@
 #include "AI.hpp"
-
 #include <algorithm>
 
 std::list<std::tuple<int, int>> generateLegalMoves(const Board& board) {
@@ -41,22 +40,32 @@ std::list<std::tuple<int, int>> generateLegalMoves(const Board& board) {
     return legalMoves;
 }
 
+
 int heuristicEvaluation(const Board& board) {
+    Player currentPlayer = board.getCurrentPlayer();
+    Player opponent = (currentPlayer == Player::BLACK) ? Player::WHITE : Player::BLACK;
     int score = 0;
 
-    for (int row = 0; row < Board::SIZE; ++row) {
-        for (int col = 0; col < Board::SIZE; ++col) {
-            Player cell = board.getCell(row, col);
-            if (cell == board.getCurrentPlayer()) {
-                ++score;
-            } else if (cell != Player::NONE) {
-                --score;
+    for (int i = 0; i < Board::SIZE; ++i) {
+        for (int j = 0; j < Board::SIZE; ++j) {
+            if (board.getCell(i, j) == currentPlayer) {
+                score += heuristicWin(board, currentPlayer, i, j);
+                score += checkCapture(board, currentPlayer, i, j);
+                score += CapturableFive(board, currentPlayer, i, j);
+                score += ItWorth(board, currentPlayer, i, j);
+                score -= Capturable(board, currentPlayer, i, j);
+            } else if (board.getCell(i, j) == opponent) {
+                score -= heuristicWin(board, opponent, i, j) - 9999999999;
+                score -= CapturableFive(board, opponent, i, j);
+                score -= ItWorth(board, opponent, i, j);
+                score += Capturable(board, opponent, i, j);
             }
         }
     }
 
-    return score;
+    return score
 }
+
 
 std::list<std::tuple<int, int>> CandidateOrdering(const Board& board) {
     std::list<std::tuple<int, int>> candidates = generateLegalMoves(board);
@@ -82,31 +91,60 @@ std::list<std::tuple<int, int>> CandidateOrdering(const Board& board) {
 }
 
 
-std::tuple<int, int> MinMax(const Board& board, int depth, bool isMaximizing, int trac) {
+
+
+
+std::tuple<int, int> FindBestMove(const Board& board){
     std::list<std::tuple<int, int>> moves = CandidateOrdering(board);
+    std::tuple<int, int> ret;
+    int maximum = 0;
 
-    if trac == depth:
-        std::tuple<int, int> ret;
-        scoremin = 0
-        scoremin =
-        for move in moves{
-            b = board.copy()
-            makeMove(b, move)
-            score = heuristicEvaluation(b)
-            if isMaximizing == 0 and score > scoremax:
-                ret = move
-            if isMaximizing == 1 and score < scoremin:
-                ret = move
-        }
-        return ret
+    for move in moves:
+        b = board.copy()
+        makeMove(b)
+        score = MinMax(b)
+        undoMove(b)
+        if score > max:
+            ret = move
+            max = score
     
-    
-    for move in moves{
-        makeMove(board.copy(), move[0], move[1])
-        MinMax(board, depth, ! isMaximizing, trac + 1)
-    }
-
-
+    return ret
 }
 
 
+int MinMax(const Board& board, int depth, bool isMaximizing) {
+    if (depth == 0 || board.isGameOver()) { 
+        return heuristicEvaluation(board);
+    }
+
+    std::list<std::tuple<int, int>> moves = CandidateOrdering(board);
+    
+    if (moves.empty()) {
+        return heuristicEvaluation(board);
+    }
+
+    if (isMaximizing) {
+        int bestScore = INT_MIN;
+
+        for (const auto& move : moves) {
+            Board b = board;
+            makeMove(b, b.currentPlayer, move);
+            
+            int currentScore = MinMax(b, depth - 1, false);
+            bestScore = std::max(bestScore, currentScore);
+        }
+        return bestScore;
+    } 
+    else {
+        int minScore = INT_MAX;
+
+        for (const auto& move : moves) {
+            Board b = board;
+            makeMove(b, b.opponent, move);
+            
+            int currentScore = MinMax(b, depth - 1, true);
+            minScore = std::min(minScore, currentScore);
+        }
+        return minScore;
+    }
+}

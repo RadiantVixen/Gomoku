@@ -197,7 +197,8 @@ bool Board::isGameOver(){
         return true;
     }
     return false;
-} 
+}
+
 
 bool Board::checkwin(Player p, int row, int col){
     if (p == Player::BLACK && whiteStonesCaptured >= 10){
