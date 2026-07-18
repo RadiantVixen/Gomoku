@@ -10,7 +10,6 @@ OBJ_DIR = obj
 # Find all .cpp files in src/ and its subdirectories
 SRCS = $(SRC_DIR)/main.cpp \
        $(SRC_DIR)/core/Board.cpp \
-	$(SRC_DIR)/core/AI.cpp \
        $(SRC_DIR)/gui/GUI.cpp
 
 # Map source files to object files in obj/

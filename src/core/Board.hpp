@@ -33,6 +33,9 @@ public:
     bool gameOver;
     int whiteStonesCaptured;
     int blackStonesCaptured;
+    bool pendingWin;
+    Player pendingWinner;
+    std::vector<std::tuple<int, int>> pendingWinningCells;
 
     Board();
     ~Board() = default;
