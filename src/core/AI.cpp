@@ -45,17 +45,22 @@ int heuristicEvaluation(const Board& board) {
     Player currentPlayer = board.getCurrentPlayer();
     Player opponent = (currentPlayer == Player::BLACK) ? Player::WHITE : Player::BLACK;
     int score = 0;
+    
+    const int INF_VALUE = 100000000;
 
     for (int i = 0; i < Board::SIZE; ++i) {
         for (int j = 0; j < Board::SIZE; ++j) {
-            if (board.getCell(i, j) == currentPlayer) {
+            Player cell = board.getCell(i, j);
+            
+            if (cell == currentPlayer) {
                 score += heuristicWin(board, currentPlayer, i, j);
                 score += checkCapture(board, currentPlayer, i, j);
                 score += CapturableFive(board, currentPlayer, i, j);
                 score += ItWorth(board, currentPlayer, i, j);
                 score -= Capturable(board, currentPlayer, i, j);
-            } else if (board.getCell(i, j) == opponent) {
-                score -= heuristicWin(board, opponent, i, j) - 9999999999;
+            } 
+            else if (cell == opponent) {
+                score -= (heuristicWin(board, opponent, i, j) + INF_VALUE);
                 score -= CapturableFive(board, opponent, i, j);
                 score -= ItWorth(board, opponent, i, j);
                 score += Capturable(board, opponent, i, j);
@@ -63,9 +68,8 @@ int heuristicEvaluation(const Board& board) {
         }
     }
 
-    return score
+    return score;
 }
-
 
 std::list<std::tuple<int, int>> CandidateOrdering(const Board& board) {
     std::list<std::tuple<int, int>> candidates = generateLegalMoves(board);
@@ -92,59 +96,58 @@ std::list<std::tuple<int, int>> CandidateOrdering(const Board& board) {
 
 
 
-
-
-std::tuple<int, int> FindBestMove(const Board& board){
+std::tuple<int, int> FindBestMove(const Board& board, int maxDepth) {
     std::list<std::tuple<int, int>> moves = CandidateOrdering(board);
-    std::tuple<int, int> ret;
-    int maximum = 0;
-
-    for move in moves:
-        b = board.copy()
-        makeMove(b)
-        score = MinMax(b)
-        undoMove(b)
-        if score > max:
-            ret = move
-            max = score
     
-    return ret
+    if (moves.empty()) {
+        return std::make_tuple(-1, -1); 
+    }
+
+    std::tuple<int, int> bestMove = moves.front();
+    int maximumScore = INT_MIN;
+
+    for (const auto& move : moves) {
+        Board b = board;
+        
+        b.makeMove(std::get<0>(move), std::get<1>(move));
+        
+        int score = MinMax(b, maxDepth - 1);
+        
+        if (score > maximumScore) {
+            maximumScore = score;
+            bestMove = move;
+        }
+    }
+    
+    return bestMove;
 }
 
 
-int MinMax(const Board& board, int depth, bool isMaximizing) {
-    if (depth == 0 || board.isGameOver()) { 
+int MinMax(const Board& board, int depth,int ownedScore) {
+    if (depth == 0 || board.isGameOver()) {
         return heuristicEvaluation(board);
     }
-
+    
     std::list<std::tuple<int, int>> moves = CandidateOrdering(board);
     
     if (moves.empty()) {
         return heuristicEvaluation(board);
     }
+    
+    int bestScore = INT_MIN;
+    
+    for (const auto& move : moves) {
+        Board b = board;
 
-    if (isMaximizing) {
-        int bestScore = INT_MIN;
-
-        for (const auto& move : moves) {
-            Board b = board;
-            makeMove(b, b.currentPlayer, move);
-            
-            int currentScore = MinMax(b, depth - 1, false);
-            bestScore = std::max(bestScore, currentScore);
-        }
-        return bestScore;
-    } 
-    else {
-        int minScore = INT_MAX;
-
-        for (const auto& move : moves) {
-            Board b = board;
-            makeMove(b, b.opponent, move);
-            
-            int currentScore = MinMax(b, depth - 1, true);
-            minScore = std::min(minScore, currentScore);
-        }
-        return minScore;
+        b.makeMove(std::get<0>(move), std::get<1>(move));
+        
+        int currentScore = -MinMax(b, depth - 1, bestScore * -1);
+        
+        bestScore = std::max(bestScore, currentScore);
+        if( currentScore <= ownedScore)
+            break;
     }
+    
+    return bestScore;
 }
+

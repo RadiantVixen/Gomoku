@@ -1,4 +1,4 @@
-#include "Board.hpp"
+#include "AI.hpp"
 
 int heuristicWin(const Board& board, Player currentPlayer, int i, int j) {
     if (board.checkwin(currentPlayer, i, j)) {
@@ -22,12 +22,8 @@ int CapturableFive(const Board& board, Player currentPlayer, int i, int j) {
     return 0;
 }
 
-
 int ItWorth(const Board& board, Player p, int i, int j) {
     if (p == Player::NONE) return 0;
-
-    leftOpen = 0;
-    rightOpen = 0;
 
     int directions[4][2] = {
         {0, 1},
@@ -35,47 +31,56 @@ int ItWorth(const Board& board, Player p, int i, int j) {
         {1, 1},
         {1, -1}
     };
-    
+
+    int maxWorth = 0;
+
     for (int k = 0; k < 4; ++k) {
-        if (i - directions[k][0] >= 0 && i - directions[k][0] < SIZE && j - directions[k][1] >= 0 && j - directions[k][1] < SIZE) {
-            if (board.grid[i - directions[k][0]][j - directions[k][1]] == p)
+        int leftOpen = 0;
+        int rightOpen = 0;
+
+        int prev_r = i - directions[k][0];
+        int prev_c = j - directions[k][1];
+        if (prev_r >= 0 && prev_r < Board::SIZE && prev_c >= 0 && prev_c < Board::SIZE) {
+            if (board.grid[prev_r][prev_c] == p)
                 continue;
-            if (board.grid[i - directions[k][0]][j - directions[k][1]] == Player::NONE)
+            if (board.grid[prev_r][prev_c] == Player::NONE)
                 leftOpen = 1;
         }
-    }
 
         int r = i + directions[k][0];
         int c = j + directions[k][1];
         int count = 1;
 
-
-
-        while (r >= 0 && r < SIZE && c >= 0 && c < SIZE && grid[r][c] == p) {
+        while (r >= 0 && r < Board::SIZE && c >= 0 && c < Board::SIZE && board.grid[r][c] == p) {
             count++;
-            if isCapturable(p, r, c):
             r += directions[k][0];
             c += directions[k][1];
         }
 
-        if (r >= 0 && r < SIZE && c >= 0 && c < SIZE && grid[r][c] == Player::NONE)
+        if (r >= 0 && r < Board::SIZE && c >= 0 && c < Board::SIZE && board.grid[r][c] == Player::NONE)
             rightOpen = 1;
-        
+
         if (!leftOpen && !rightOpen)
             continue;
+
+        int worth = 0;
         if (count == 4 && leftOpen && rightOpen)
-            return OPEN_FOUR;
-        if (count == 4 && (leftOpen || rightOpen))
-            return CLOSED_FOUR;
-        if (count == 3 && leftOpen && rightOpen)
-            return OPEN_THREE;
-        if (count == 3 && (leftOpen || rightOpen))
-            return CLOSED_THREE;
-    
-    return 0;
+            worth = OPEN_FOUR;
+        else if (count == 4 && (leftOpen || rightOpen))
+            worth = CLOSED_FOUR;
+        else if (count == 3 && leftOpen && rightOpen)
+            worth = OPEN_THREE;
+        else if (count == 3 && (leftOpen || rightOpen))
+            worth = CLOSED_THREE;
+
+        if (worth > maxWorth) {
+            maxWorth = worth;
+        }
+    }
+
+    return maxWorth;
 }
 
-    
 int Capturable(const Board& board, Player p, int i, int j) {
     if (p == Player::NONE) return 0;
     Player opponent = (p == Player::BLACK) ? Player::WHITE : Player::BLACK;
@@ -86,22 +91,22 @@ int Capturable(const Board& board, Player p, int i, int j) {
         int r = i - directions[k][0];
         int c = j - directions[k][1];
         int l = 0;
-        if (r >= 0 && r < SIZE && c >= 0 && c < SIZE && board.grid[r][c] != opponent)
+        if (r >= 0 && r < Board::SIZE && c >= 0 && c < Board::SIZE && board.grid[r][c] != opponent)
             continue;
 
-        while (r >= 0 && r < SIZE && c >= 0 && c < SIZE && l < 4) {
+        while (r >= 0 && r < Board::SIZE && c >= 0 && c < Board::SIZE && l < 4) {
             trap.push_back({r, c});
             l ++;
             r += directions[k][0];
             c += directions[k][1];
         }
         if (trap.size() == 4 &&
-            grid[std::get<0>(trap[0])][std::get<1>(trap[0])] == opponent &&
-            grid[std::get<0>(trap[1])][std::get<1>(trap[1])] == p &&
-            grid[std::get<0>(trap[2])][std::get<1>(trap[2])] == p &&
-            grid[std::get<0>(trap[3])][std::get<1>(trap[3])] == Player::NONE)
+            board.grid[std::get<0>(trap[0])][std::get<1>(trap[0])] == opponent &&
+            board.grid[std::get<0>(trap[1])][std::get<1>(trap[1])] == p &&
+            board.grid[std::get<0>(trap[2])][std::get<1>(trap[2])] == p &&
+            board.grid[std::get<0>(trap[3])][std::get<1>(trap[3])] == Player::NONE)
             return CAPTURABLE;
-        
+
         trap.clear();
     }
     return 0;

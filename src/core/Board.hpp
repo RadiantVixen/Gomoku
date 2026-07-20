@@ -7,8 +7,8 @@
 #include <list>
 
 const int MAX_DEPTH = 10;
-long const int WINNING = 99999999999;
-long const int LOSING = -99999999999;
+const int WINNING = 1000000000;
+const int LOSING = -1000000000;
 const int CAPTURABLE_FIVE = 100000;
 const int CAPTURE = 10000;
 const int OPEN_FOUR = 10000;
@@ -41,13 +41,13 @@ public:
     Player getCell(int row, int col) const;
     bool isValidMove(int row, int col) const;
     bool makeMove(int row, int col);
-    bool isCapturable(Player p, int row, int col);
-    int checkFiveInRow(Player p, int row, int col);
+    bool isCapturable(Player p, int row, int col) const;
+    int checkFiveInRow(Player p, int row, int col) const;
     bool checkCapture(Player p, int row, int col);
     bool doubleThree(Player p, int row, int col);
     bool isFreeThree(Player p, int row, int col);
-    bool isGameOver();
-    bool checkwin(Player p, int row, int col);
+    bool isGameOver() const;
+    bool checkwin(Player p, int row, int col) const;
     Player getCurrentPlayer() const { return currentPlayer;}
     Player getWinner() const { return winner; }
     void undoMove(int row, int col);
