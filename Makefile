@@ -10,6 +10,7 @@ OBJ_DIR = obj
 # Find all .cpp files in src/ and its subdirectories
 SRCS = $(SRC_DIR)/main.cpp \
        $(SRC_DIR)/core/Board.cpp \
+       $(SRC_DIR)/core/Heuristic.cpp \
        $(SRC_DIR)/gui/GUI.cpp
 
 # Map source files to object files in obj/
@@ -17,6 +18,7 @@ OBJS = $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRCS))
 
 # Header dependencies to trigger recompile on header change
 DEPS = $(SRC_DIR)/core/Board.hpp \
+       $(SRC_DIR)/core/Heuristic.hpp \
        $(SRC_DIR)/gui/GUI.hpp
 
 all: $(NAME)

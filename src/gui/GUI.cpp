@@ -1,4 +1,5 @@
 #include "GUI.hpp"
+#include "../core/Heuristic.hpp"
 #include <cmath>
 #include <iostream>
 
@@ -187,6 +188,13 @@ void GUI::handleEvents() {
                             moveCount++;
                             lastMoveRow = row;
                             lastMoveCol = col;
+
+                            std::cout << "\n===== LIVE EVALUATOR TRACE =====" << std::endl;
+                            std::cout << "Move played at (" << row << "," << col << ")" << std::endl;
+                            std::cout << "Current turn after move: " << ((board.getCurrentPlayer() == Player::BLACK) ? "BLACK" : "WHITE") << std::endl;
+                            setEvaluatorDebugEnabled(true);
+                            debugRankedMoves(board, board.getCurrentPlayer(), 8);
+                            std::cout << "===== END EVALUATOR TRACE =====\n" << std::endl;
                         }
                     }
                 }
